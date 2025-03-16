@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Quiz App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        [x-cloak] { display: none !important; }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen" x-data="quiz">
+    <script src="script.js"></script>
+    <!-- Start Screen -->
+    <div x-show="step === 'start'" x-cloak class="container mx-auto px-4 py-8 max-w-2xl">
+        <div class="bg-white rounded-2xl shadow-xl p-8">
+            <h1 class="text-3xl font-bold text-center mb-8 text-gray-800">Interactive Quiz</h1>
+            
+            <div class="space-y-6">
+                <!-- Category Selection -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Select Category</label>
+                    <select x-model="category" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <template x-for="cat in categories" :key="cat.id">
+                            <option :value="cat.id" x-text="cat.name"></option>
+                        </template>
+                    </select>
+                </div>
+
+                <!-- Difficulty Selection -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Select Difficulty</label>
+                    <select x-model="difficulty" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <template x-for="diff in difficulties" :key="diff.id">
+                            <option :value="diff.id" x-text="diff.name"></option>
+                        </template>
+                    </select>
+                </div>
+
+                <!-- Number of Questions -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Number of Questions</label>
+                    <input type="number" x-model.number="numQuestions" min="1" max="50" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+
+                <!-- Start Button -->
+                <button 
+                    @click="startQuiz()"
+                    :disabled="loading"
+                    class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors disabled:bg-blue-400">
+                    <span x-text="loading ? 'Loading...' : 'Start Quiz'"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quiz Screen -->
+    <div x-show="step === 'quiz'" x-cloak class="container mx-auto px-4 py-8 max-w-2xl">
+        <div class="bg-white rounded-2xl shadow-xl p-8">
+            <!-- Progress Bar -->
+            <div class="mb-6">
+                <div class="h-2 w-full bg-gray-200 rounded-full">
+                    <div class="h-2 bg-blue-600 rounded-full transition-all duration-300"
+                         :style="`width: ${(currentQuestion + 1) / questions.length * 100}%`"></div>
+                </div>
+                <div class="text-sm text-gray-600 mt-2">
+                    Question <span x-text="currentQuestion + 1"></span> of <span x-text="questions.length"></span>
+                </div>
+            </div>
+
+            <!-- Question -->
+            <div class="mb-8">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4" x-text="decodeHtml(questions[currentQuestion].question)"></h2>
+                
+                <!-- Answers -->
+                <div class="space-y-3">
+                    <template x-for="(answer, index) in questions[currentQuestion].answers" :key="index">
+                        <button 
+                            @click="selectedAnswer = answer"
+                            :class="{
+                                'w-full p-4 rounded-lg text-left transition-all duration-200': true,
+                                'bg-gray-100 hover:bg-gray-200': selectedAnswer !== answer,
+                                'bg-blue-100 border-2 border-blue-500': selectedAnswer === answer
+                            }"
+                            x-text="decodeHtml(answer)"></button>
+                    </template>
+                </div>
+            </div>
+
+            <!-- Next Button -->
+            <button 
+                @click="checkAnswer(selectedAnswer)"
+                :disabled="!selectedAnswer"
+                class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors disabled:bg-blue-400">
+                Next Question
+            </button>
+        </div>
+    </div>
+
+    <!-- Results Screen -->
+    <div x-show="step === 'results'" x-cloak class="container mx-auto px-4 py-8 max-w-2xl">
+        <div class="bg-white rounded-2xl shadow-xl p-8 text-center">
+            <h2 class="text-3xl font-bold mb-4">Quiz Complete!</h2>
+            <div class="text-6xl font-bold text-blue-600 mb-4">
+                <span x-text="score"></span>/<span x-text="questions.length"></span>
+            </div>
+            <p class="text-xl text-gray-600 mb-8">
+                You got <span x-text="score"></span> out of <span x-text="questions.length"></span> questions correct!
+            </p>
+            <button 
+                @click="resetQuiz()"
+                class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors">
+                Try Again
+            </button>
+        </div>
+    </div>
+</body>
+</html>
