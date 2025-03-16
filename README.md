@@ -13,7 +13,7 @@ A dynamic quiz application built with HTML, Alpine.js, and Tailwind CSS that fet
 
 ## Live Demo
 
-Visit the live app: [Interactive Quiz App](https://[your-username].github.io/quiz-app/)
+Visit the live app: [Interactive Quiz App](https://mehedibu2013.github.io/Interactive-Quiz-App/)
 
 ## Deployment Steps
 
